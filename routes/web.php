@@ -14,11 +14,20 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return redirect()->route('backend.users.create');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
+Route::
+    as('backend.')
+    ->middleware('auth')
+    ->prefix('backend')
+    ->namespace('\App\Http\Controllers')
+    ->group(function () {
+        Route::get('', function () {
+            return redirect()->route('backend.users.index');
+        });
 
-require __DIR__.'/auth.php';
+        Route::resource('users', 'UserController');
+    });
+
+Route::prefix('auth')->group( fn () => require __DIR__.'/auth.php');
