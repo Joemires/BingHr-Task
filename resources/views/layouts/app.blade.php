@@ -12,8 +12,8 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@latest/css/boxicons.min.css">
 
     <link rel="stylesheet" href="{{ asset('css/main.css') }}">
-
     @stack('styles')
+
 </head>
 
 <body id="body-pd">
@@ -88,10 +88,30 @@
         <nav class="nav">
             <div>
                 <div class="nav_list">
-                    <a href="#" class="nav_link"> <i class='bx bx-search nav_icon'></i> <span class="nav_name">Dashboard</span> </a> <a href="#" class="nav_link"> <i class='bx bx-user nav_icon'></i> <span class="nav_name">Users</span> </a>
-                    <a href="#" class="nav_link"> <i class='bx bx-message-square-detail nav_icon'></i> <span class="nav_name">Messages</span> </a>
-                    <a href="#" class="nav_link"> <i class='bx bx-bookmark nav_icon'></i> <span class="nav_name">Bookmark</span> </a>
-                    <a href="#" class="nav_link"> <i class='bx bx-folder nav_icon'></i> <span class="nav_name">Files</span> </a> <a href="#" class="nav_link"> <i class='bx bx-bar-chart-alt-2 nav_icon'></i> <span class="nav_name">Stats</span> </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-search nav_icon'></i>
+                        <span class="nav_name">Dashboard</span>
+                    </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-user nav_icon'></i>
+                        <span class="nav_name">Users</span>
+                    </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-message-square-detail nav_icon'></i>
+                        <span class="nav_name">Messages</span>
+                    </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-bookmark nav_icon'></i>
+                        <span class="nav_name">Bookmark</span>
+                    </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-folder nav_icon'></i>
+                        <span class="nav_name">Files</span>
+                    </a>
+                    <a href="#" class="nav_link">
+                        <i class='bx bx-bar-chart-alt-2 nav_icon'></i>
+                        <span class="nav_name">Stats</span>
+                    </a>
                 </div>
             </div>
             <div>
@@ -130,22 +150,24 @@
         <i class="bx bx-plus rounded-circle bg-primary text-white p-2 nav-toggler" style="font-size: 28px"></i>
     </a>
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    @stack('modals')
+
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
+    {{-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script> --}}
     {{-- <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.1/dist/js/bootstrap.bundle.min.js"></script> --}}
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js"></script>
 
+    @stack('scripts')
+
     <script>
         $(document).ready(() => {
-            $(window).resize(() => {
-                    document.documentElement.style.setProperty('--nav-width', $('#nav-bar').width() + 'px');
-                })
-                .resize();
+            $(window).resize(() => { document.documentElement.style.setProperty('--nav-width', $('#nav-bar').width() + 'px')}).resize();
 
             $('.nav-toggler').click((e) => {
                 $('#nav-bar').toggleClass('show');
                 $('.nav-toggler').toggleClass('bx-x');
-                document.documentElement.style.setProperty('--nav-width', $('#nav-bar').width() + 'px');
                 $('body').toggleClass('nav-open');
+                document.documentElement.style.setProperty('--nav-width', $('#nav-bar').width() + 'px');
                 // $('body, header').css('padding-left', "calc(" + ($('#nav-bar').width() + 'px') + " + 1rem)");
                 // $('.header').toggleClass('body-pd');
             });
@@ -164,6 +186,7 @@
             // Your code to run since DOM is loaded and ready
         })
     </script>
+
 </body>
 
 </html>
