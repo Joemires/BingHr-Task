@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return redirect()->route('backend.users.create');
+    return redirect()->route('backend.users.index');
 });
 
 Route::
@@ -23,7 +23,7 @@ Route::
     ->prefix('backend')
     ->namespace('\App\Http\Controllers')
     ->group(function () {
-        Route::get('', function () {
+        Route::get('overview', function () {
             return redirect()->route('backend.users.index');
         });
 
