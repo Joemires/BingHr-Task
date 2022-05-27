@@ -132,9 +132,9 @@ class UserController extends Controller
             'mobile.phone' => 'Mobile number is not valid'
         ]);
 
-        if(! auth()->user()->hasRole('super_admin')) {
+        // if(! auth()->user()->hasRole('super_admin')) {
             return response()->json(['error' => 'Only Main Administrator is allowed to issue this action.'], 422);
-        }
+        // }
 
         if($request->password) {
             $user->password = bcrypt($request->password);

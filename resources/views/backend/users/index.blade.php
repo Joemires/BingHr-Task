@@ -262,18 +262,22 @@
                                 location.reload()
                             })
                         })
-                        .fail(function(data) {
+                        .fail(function(error) {
 
-                            if(data.responseJSON.errors) {
+                            if(error.responseJSON.errors instanceof Array) {
                                 var errors = [];
-                                Object.entries(data.responseJSON.errors).forEach( (error) => {
+                                Object.entries(error.responseJSON.errors).forEach( (error) => {
                                     errors[error[0] == 'mobile' ? 'mobile_country' : (error[0] == 'role_permission' ? 'role_permission_error' : error[0])] = error[1][0];
                                 });
 
                                 $(form).validate().showErrors(Object.assign({}, errors))
                             }
-                        });
 
+                            if(error.responseJSON.error)
+                                Notiflix.Report.failure('Error Occurred', error.responseJSON.error)
+                            else
+                                Notiflix.Report.failure('Error Occurred', 'Something went wrong')
+                        });
                     }
                 })
 
@@ -290,7 +294,6 @@
                         $('body').on("countrychange", "input.tel-input", function(e, countryData) {
                             $('[name=mobile_country]').val(countryData.iso2.toUpperCase())
                         });
-                        // var validator = $('.edit-modal-container .modal form').validate()
                     })
                 })
 
