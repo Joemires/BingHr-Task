@@ -15,9 +15,9 @@
 - Run `php artisan app:init` to initialize the application
 - Run `php artisan serve` and open the url in your browser
 
-<p>
+<br>
 On running `php artisan app:init`, the system will do all migration and create a superadmin user with email - `super@app.com` and password - `secret`
-</p>
+
 
 ## About Laravel
 
