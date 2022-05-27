@@ -27,6 +27,7 @@ Route::
             return redirect()->route('backend.users.index');
         });
 
+        // Route::delete('users/{user}/destroy', 'UserController@destroy')->name('users.destroy');
         Route::resource('users', 'UserController');
     });
 

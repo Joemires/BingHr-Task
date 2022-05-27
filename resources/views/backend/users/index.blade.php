@@ -258,13 +258,11 @@
                         })
                         .success( function(data) {
                             console.log(data);
-                            Notiflix.Report.success('Action Completed', data.success, function cb() {
+                            Notiflix.Report.success('Action Completed', data.success, "Continue", function cb() {
                                 location.reload()
                             })
                         })
                         .fail(function(data) {
-
-                            console.log(data);
 
                             if(data.responseJSON.errors) {
                                 var errors = [];
@@ -298,23 +296,27 @@
 
                 $('tr .action a.trash').click( function(e) {
                     e.preventDefault();
+                    var href = $(this).attr('href');
                     Notiflix.Confirm.show(
                         "Critical Action Confirmation",
                         "You're about deleting this user. Please understand that there is no trash bag. This user will be lost",
                         "Confirm", "Cancel",
                         function okCb() {
                             $.ajax({
-                                url: $(this).attr('href'),
-                                method: 'DELETE',
-                                data: {_token: '{{ csrf_token() }}'}
+                                url: href,
+                                method: 'POST',
+                                data: {_token: '{{ csrf_token() }}', _method: 'DELETE'}
                             })
                             .success( function(data) {
-                                Notiflix.Report.success('Action Completed', data.success, function cb() {
+                                Notiflix.Report.success('Action Completed', data.success, "Continue", function cb() {
                                     location.reload()
                                 })
                             })
                             .fail(error => {
-                                console.log(error);
+                                if(error.responseJSON.error)
+                                    Notiflix.Report.failure('Error Occurred', error.responseJSON.error)
+                                else
+                                    Notiflix.Report.failure('Error Occurred', 'Something went wrong')
                             })
                         }
                     );

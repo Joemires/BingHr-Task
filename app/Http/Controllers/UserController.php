@@ -74,6 +74,10 @@ class UserController extends Controller
             'position' => $request->role
         ]);
 
+        if(! auth()->user()->hasRole('super_admin')) {
+            return response()->json(['error' => 'Only Main Administrator is allowed to issue this action.'], 422);
+        }
+
         $permissions = Permission::whereIn('name', $request->role_permission)->get()->toArray();
         $user->attachRole(UserPosition::getRole($request->role));
         $user->attachPermissions($permissions);
@@ -128,6 +132,10 @@ class UserController extends Controller
             'mobile.phone' => 'Mobile number is not valid'
         ]);
 
+        if(! auth()->user()->hasRole('super_admin')) {
+            return response()->json(['error' => 'Only Main Administrator is allowed to issue this action.'], 422);
+        }
+
         if($request->password) {
             $user->password = bcrypt($request->password);
         }
@@ -167,11 +175,11 @@ class UserController extends Controller
             return response()->json(['error' => 'You can not delete yourself.'], 422);
         }
 
-        if(! $user->hasRole('super_admin')) {
-            return response()->json(['success' => 'Hurray! User have been deleted successfully.'], 422);
+        if(! auth()->user()->hasRole('super_admin')) {
+            return response()->json(['error' => 'Only Main Administrator is allowed to issue this action.'], 422);
         }
 
-        // $user->delete();
+        $user->delete();
         return response()->json(['success' => 'Hurray! User have been deleted successfully.']);
     }
 }
