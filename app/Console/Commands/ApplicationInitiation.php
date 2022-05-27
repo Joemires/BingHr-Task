@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Enums\UserPosition;
 use Carbon\Carbon;
 use App\Models\Role;
 use App\Models\User;
@@ -38,7 +39,7 @@ class ApplicationInitiation extends Command
 
         $super_admin = Role::create([
             'name' => 'super_admin',
-            'display_name' => 'Super Administrator', // optional
+            'display_name' => 'Super Admin', // optional
             // 'description' => 'User is the owner of a given project', // optional
         ]);
 
@@ -56,7 +57,7 @@ class ApplicationInitiation extends Command
 
         Role::create([
             'name' => 'hr_admin',
-            'display_name' => 'HR Administrator', // optional
+            'display_name' => 'HR Admin', // optional
             // 'description' => 'User is the owner of a given project', // optional
         ]);
 
@@ -85,6 +86,7 @@ class ApplicationInitiation extends Command
                     'working' => '+19876543210',
                 ]
             ],
+            'position' => UserPosition::CEO_AND_FOUNDER()->key,
             'email_verified_at' => Carbon::now(),
             'password' => Hash::make('secret')
         ]);

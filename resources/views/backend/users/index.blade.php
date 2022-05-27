@@ -27,7 +27,7 @@
                 color: #b7c0d1
             }
 
-            .table-responsive>div,
+            .table-responsive > div.allow-pad,
             .table-responsive tr>th,
             .table-responsive tr>td {
                 padding-left: 1.5rem;
@@ -42,6 +42,21 @@
                 border: none
             }
 
+            input.error + label.error, select.error + label.error {
+                color: #ff9494;
+                margin-top: 5px;
+                font-size: 12px;
+            }
+
+            .table-responsive .form-group label.error {
+                /* margin: 20px */
+                border-top: 1px solid #dee2e6;
+                padding: .3rem 1.5rem;
+                padding-right: 1.5rem;
+                margin: 0;
+                display: block
+            }
+
         </style>
     @endpush
     <div class="row gap-3">
@@ -51,7 +66,7 @@
         </div>
         <div class="col-12">
             <div class="table-responsive bg-white rounded-0">
-                <div class="d-flex align-items-center justify-content-between py-2">
+                <div class="d-flex align-items-center justify-content-between py-2 allow-pad">
                     <h5 class="m-0" style="font-size: 18px">List Users</h5>
 
                     <div class="form-group m-0 position-relative">
@@ -71,7 +86,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ([1, 2, 3, 4] as $iteration)
+                        @foreach ($users as $user)
                             <tr>
                                 <td>
                                     <div class="d-flex">
@@ -80,15 +95,17 @@
                                             {{-- <img src="images/avatar.svg" class="rounded-circle" alt="Sample Image"> --}}
                                         </div>
                                         <div class="flex-grow-1 ms-3">
-                                            <h5 class="m-0 f-large">Jhon Carter
-                                                <small class="d-block text-muted">user@mail.com</small>
+                                            <h5 class="m-0 f-large">
+                                                {{ $user->name }}
+                                                <small class="d-block text-muted">{{ $user->email }}</small>
                                             </h5>
                                         </div>
                                     </div>
                                 </td>
-                                <td><span class="badge bg-success">Admin</span></td>
-                                <td>25th June, 2022</td>
-                                <td>CEO and Founder</td>
+                                <td>{!! role_badge($user->roles->first()->name) !!}</td>
+                                {{-- <td><span class="badge bg-success">{{ $user->roles->first()->display_name }}</span></td> --}}
+                                <td>{{ $user->created_at->format('jS M, Y') }}</td>
+                                <td>{{ App\Enums\UserPosition::getTitle($user->position) }}</td>
                                 <td class="text-end action">
                                     <a class="text-muted me-1" href=""> <i class="bx bx-edit"></i> </a>
                                     <a class="text-muted" href=""> <i class="bx bx-trash"></i> </a>
@@ -138,34 +155,37 @@
 
                                 <div class="col-lg-4">
                                     <div class="form-group mb-2">
-                                        <input type="tel" class="form-control form-control-sm tel-input" name="name" placeholder="Mobile No">
+                                        <input type="tel" class="form-control form-control-sm tel-input" name="mobile" placeholder="Mobile No">
                                         <input type="hidden" name="mobile_country" value="US">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4">
                                     <div class="form-group mb-2">
-                                        <select class="form-control form-control-sm" name="role">
+                                        <select class="form-control form-control-sm role-picker" name="role">
                                             <option value="" selected disabled>Select Role Type</option>
+                                            @foreach (App\Enums\UserPosition::getKeys() as $position)
+                                            <option value="{{ $position }}" data-role-name="{{ App\Enums\UserPosition::getRole($position) }}">{{ App\Enums\UserPosition::getTitle($position) }}</option>
+                                            @endforeach
                                         </select>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4">
                                     <div class="form-group mb-2">
-                                        <input type="text" class="form-control form-control-sm" name="username" placeholder="Username*">
+                                        <input type="text" class="form-control form-control-sm" name="username" placeholder="Username*"b required>
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4">
                                     <div class="form-group mb-2">
-                                        <input type="password" class="form-control form-control-sm" name="passsword" placeholder="Password">
+                                        <input type="password" class="form-control form-control-sm" name="password" placeholder="Password">
                                     </div>
                                 </div>
 
                                 <div class="col-lg-4">
                                     <div class="form-group mb-2">
-                                        <input type="password" class="form-control form-control-sm" name="confirm_password" placeholder="Confirm Password*">
+                                        <input type="password" class="form-control form-control-sm" name="password_confirmation" placeholder="Confirm Password*">
                                     </div>
                                 </div>
 
@@ -184,7 +204,7 @@
                                 </thead>
                                 <tbody>
                                     @foreach ($roles as $role)
-                                    <tr class="text-muted" data-role-name="{{ $role->name }}">
+                                    <tr data-role-name="{{ $role->name }}">
                                         <td>{{ $role->display_name }}</td>
                                         <td><input class="form-check-input" name="role_permission[]" type="checkbox" value="read"></td>
                                         <td><input class="form-check-input" name="role_permission[]" type="checkbox" value="write"></td>
@@ -193,9 +213,12 @@
                                     @endforeach
                                 </tbody>
                             </table>
+                            <div class="form-group">
+                                <input type="hidden" name="role_permission_error">
+                            </div>
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-sm btn-primary">Add User</button>
+                            <button type="submit" class="btn btn-sm btn-primary">Add User</button>
                             <button type="button" class="btn btn-sm" data-bs-dismiss="modal">Close</button>
                         </div>
                     </form>
@@ -203,10 +226,13 @@
             </div>
         </div>
 
-        <div class="edit-modal-container"></div>
+        <div class="edit-modal-container">
+            {{-- {{ dd(App\Enums\UserPosition::getDescription(1))}} --}}
+        </div>
     @endpush
 
     @push('scripts')
+        <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.19.3/dist/jquery.validate.min.js"></script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.7/js/intlTelInput.js"></script>
         <script>
             $(document).ready(function () {
@@ -215,9 +241,53 @@
                 });
 
                 $("input.tel-input").on("countrychange", function(e, countryData) {
-                    // do something with countryData
                     $('[name=mobile_country]').val(countryData.iso2.toUpperCase())
                 });
+
+                var validator = $('.modal form').validate()
+
+                $('form').submit(function(e) {
+                    e.preventDefault()
+                    if(validator.form()) {
+                        $.ajax({
+                            url: $(this).attr('action'),
+                            method: 'POST',
+                            data: $(this).serialize()
+                        })
+                        .success( function(data) {
+                            console.log(data);
+                            Notiflix.Report.success('Action Completed', 'Hurray! New user has been created successfully.', function cb() {
+                                location.reload()
+                            })
+                        })
+                        .fail(function(data) {
+
+                            console.log(data);
+
+                            if(data.responseJSON.errors) {
+                                var errors = [];
+                                Object.entries(data.responseJSON.errors).forEach( (error) => {
+                                    errors[error[0] == 'mobile' ? 'mobile_country' : (error[0] == 'role_permission' ? 'role_permission_error' : error[0])] = error[1][0];
+                                });
+
+                                $('.modal form').validate().showErrors(Object.assign({}, errors))
+                            }
+                        });
+
+                    }
+                })
+
+                $('.role-picker').on('change', function () {
+                    $(this).parents('.modal-body').next().find('tbody tr').removeClass('text-muted').find('input').prop('disabled', false);
+                    var tr = $(this).parents('.modal-body').next().find('tbody tr:not([data-role-name=' + $(this).find('option:selected').data('role-name') + '])');
+                    tr.addClass('text-muted');
+                    tr.find('input').prop('disabled', true);
+                })
+
+                Array.prototype.insert = function ( index, item ) {
+                    this.splice( index, 0, item );
+                };
+
             });
         </script>
 

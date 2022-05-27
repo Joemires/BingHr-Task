@@ -2,9 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\UserPosition;
+use App\Models\Permission;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use Propaganistas\LaravelPhone\PhoneNumber;
 
 class UserController extends Controller
 {
@@ -15,8 +19,11 @@ class UserController extends Controller
      */
     public function index()
     {
+        // dd(\App\Enums\UserPosition::HR()->getDescriptionx());
+        $users = User::with('roles', 'permissions')->get();
+        // dd($users);
         $roles = Role::all();
-        return view('backend.users.index', compact('roles'));
+        return view('backend.users.index', compact('roles', 'users'));
     }
 
     /**
@@ -37,7 +44,38 @@ class UserController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $request->validate([
+            'identifier' => 'required',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'email' => 'required|string|email|max:255|unique:users',
+            'password' => 'required|string|min:6|confirmed',
+            'role' => 'required|string',
+            'role_permission' => 'required|array',
+            'mobile' => 'phone'
+        ], [
+            'mobile.phone' => 'Mobile number is not valid'
+        ]);
+
+        $user = User::create([
+            'identifier' => $request->identifier,
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'username' => $request->username,
+            'email' => $request->email,
+            'password' => bcrypt($request->password),
+            'contacts' => [
+                'mobile' => [
+                    'working' => PhoneNumber::make($request->mobile, Str::upper($request->mobile_country))->formatE164(),
+                ]
+            ],
+            'position' => $request->role
+        ]);
+
+        $permissions = Permission::whereIn('name', $request->role_permission)->get()->toArray();
+        $user->attachRole(UserPosition::getRole($request->role));
+        $user->attachPermissions($permissions);
+
+        return response()->json(['success' => 'User created successfully']);
     }
 
     /**

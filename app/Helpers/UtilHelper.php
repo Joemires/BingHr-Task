@@ -31,3 +31,8 @@ function generateRandomString($length = 10) {
     }
     return $randomString;
 }
+
+function role_badge($role) {
+    $ar = collect(['super_admin' => '<span class="badge bg-danger">Super Admin</span>', 'admin' => '<span class="badge bg-info">Admin</span>', 'hr_admin' => '<span class="badge bg-success">HR Admin</span>', 'employee' => '<span class="badge bg-light">Employee</span>']);
+    return $ar->get($role);
+}

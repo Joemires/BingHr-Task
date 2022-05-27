@@ -13,7 +13,15 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        \Illuminate\Support\Collection::macro('recursive', function () {
+            return collect($this)->map(function ($value) {
+                if (is_array($value) || is_object($value)) {
+                    return collect($value)->recursive();
+                }
+
+                return $value;
+            });
+        });
     }
 
     /**
