@@ -179,6 +179,10 @@ class UserController extends Controller
             return response()->json(['error' => 'Only Main Administrator is allowed to issue this action.'], 422);
         }
 
+        if(! auth()->user()->id == 1) {
+            return response()->json(['error' => 'You cannot delete the system main administrator'], 422);
+        }
+
         $user->delete();
         return response()->json(['success' => 'Hurray! User have been deleted successfully.']);
     }

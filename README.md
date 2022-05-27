@@ -7,6 +7,18 @@
 <a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
 </p>
 
+## Installation
+- Run `git clone https://github.com/Joemires/BingHr-Task`
+- Copy .env.example to .env
+- Edit your database configuration to your choice or set to sqlite
+- Run `composer update` inside the project directory
+- Run `php artisan app:init` to initialize the application
+- Run `php artisan serve` and open the url in your browser
+
+<p>
+On running `php artisan app:init`, the system will do all migration and create a superadmin user with email - super@app.com and password - secret
+</p>
+
 ## About Laravel
 
 Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
