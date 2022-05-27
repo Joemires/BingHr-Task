@@ -83,7 +83,10 @@ class ApplicationInitiation extends Command
             'email' => 'super@app.com',
             'contacts' => [
                 'mobile' => [
-                    'working' => '+19876543210',
+                    'working' => [
+                        'number' => '0123456789',
+                        'country_iso' => 'BD',
+                    ],
                 ]
             ],
             'position' => UserPosition::CEO_AND_FOUNDER()->key,

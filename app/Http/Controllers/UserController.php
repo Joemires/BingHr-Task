@@ -65,7 +65,10 @@ class UserController extends Controller
             'password' => bcrypt($request->password),
             'contacts' => [
                 'mobile' => [
-                    'working' => PhoneNumber::make($request->mobile, Str::upper($request->mobile_country))->formatE164(),
+                    'working' => [
+                        'number' => PhoneNumber::make($request->mobile, Str::upper($request->mobile_country))->formatE164(),
+                        'country_iso' => $request->mobile_country,
+                    ],
                 ]
             ],
             'position' => $request->role
@@ -75,7 +78,7 @@ class UserController extends Controller
         $user->attachRole(UserPosition::getRole($request->role));
         $user->attachPermissions($permissions);
 
-        return response()->json(['success' => 'User created successfully']);
+        return response()->json(['success' => 'Hurray! User have been created successfully.']);
     }
 
     /**
@@ -97,7 +100,11 @@ class UserController extends Controller
      */
     public function edit(User $user)
     {
-        //
+        $roles = Role::all();
+        if(request()->__modal) {
+            $view = view('backend.users.edit', compact('user', 'roles'))->render();
+            return response()->json(['html' => $view]);
+        }
     }
 
     /**
@@ -109,7 +116,43 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        //
+        $request->validate([
+            // 'identifier' => 'required',
+            'first_name' => 'required|string',
+            'last_name' => 'required|string',
+            'password' => Str::length($request->password) > 0 ? 'required|string|min:6|confirmed' : 'sometimes',
+            'role' => 'required|string',
+            'role_permission' => 'required|array',
+            'mobile' => 'phone'
+        ], [
+            'mobile.phone' => 'Mobile number is not valid'
+        ]);
+
+        if($request->password) {
+            $user->password = bcrypt($request->password);
+        }
+
+        $user->fill([
+            // 'identifier' => $request->identifier,
+            'name' => $request->first_name . ' ' . $request->last_name,
+            'contacts' => [
+                'mobile' => [
+                    'working' => [
+                        'number' => PhoneNumber::make($request->mobile, Str::upper($request->mobile_country))->formatE164(),
+                        'country_iso' => $request->mobile_country,
+                    ],
+                ]
+            ],
+            'position' => $request->role
+        ]);
+
+        $user->save();
+
+        $permissions = Permission::whereIn('name', $request->role_permission)->get()->toArray();
+        $user->syncRoles([UserPosition::getRole($request->role)]);
+        $user->syncPermissions($permissions);
+
+        return response()->json(['success' => 'Hurray! User have been updated successfully.']);
     }
 
     /**
@@ -120,6 +163,15 @@ class UserController extends Controller
      */
     public function destroy(User $user)
     {
-        //
+        if($user->is(auth()->user())) {
+            return response()->json(['error' => 'You can not delete yourself.'], 422);
+        }
+
+        if(! $user->hasRole('super_admin')) {
+            return response()->json(['success' => 'Hurray! User have been deleted successfully.'], 422);
+        }
+
+        // $user->delete();
+        return response()->json(['success' => 'Hurray! User have been deleted successfully.']);
     }
 }

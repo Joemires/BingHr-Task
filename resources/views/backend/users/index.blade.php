@@ -91,7 +91,8 @@
                                 <td>
                                     <div class="d-flex">
                                         <div class="flex-shrink-0">
-                                            <i class="bx bx-user"></i>
+                                            {!! $user->avatarSvg !!}
+                                            {{-- <i class="bx bx-user"></i> --}}
                                             {{-- <img src="images/avatar.svg" class="rounded-circle" alt="Sample Image"> --}}
                                         </div>
                                         <div class="flex-grow-1 ms-3">
@@ -107,8 +108,8 @@
                                 <td>{{ $user->created_at->format('jS M, Y') }}</td>
                                 <td>{{ App\Enums\UserPosition::getTitle($user->position) }}</td>
                                 <td class="text-end action">
-                                    <a class="text-muted me-1" href=""> <i class="bx bx-edit"></i> </a>
-                                    <a class="text-muted" href=""> <i class="bx bx-trash"></i> </a>
+                                    <a class="text-muted me-1 edit" href="{{ route('backend.users.edit', $user->identifier) }}"> <i class="bx bx-edit"></i> </a>
+                                    <a class="text-muted trash" href="{{ route('backend.users.destroy', $user->identifier) }}"> <i class="bx bx-trash"></i> </a>
                                 </td>
                             </tr>
                         @endforeach
@@ -240,14 +241,15 @@
                     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.6/js/utils.js"
                 });
 
-                $("input.tel-input").on("countrychange", function(e, countryData) {
+                $('body').on("countrychange", "input.tel-input", function(e, countryData) {
                     $('[name=mobile_country]').val(countryData.iso2.toUpperCase())
                 });
 
                 var validator = $('.modal form').validate()
 
-                $('form').submit(function(e) {
+                $('body').on('submit', '.modal form', function(e) {
                     e.preventDefault()
+                    var form = $(this)
                     if(validator.form()) {
                         $.ajax({
                             url: $(this).attr('action'),
@@ -256,7 +258,7 @@
                         })
                         .success( function(data) {
                             console.log(data);
-                            Notiflix.Report.success('Action Completed', 'Hurray! New user has been created successfully.', function cb() {
+                            Notiflix.Report.success('Action Completed', data.success, function cb() {
                                 location.reload()
                             })
                         })
@@ -270,14 +272,55 @@
                                     errors[error[0] == 'mobile' ? 'mobile_country' : (error[0] == 'role_permission' ? 'role_permission_error' : error[0])] = error[1][0];
                                 });
 
-                                $('.modal form').validate().showErrors(Object.assign({}, errors))
+                                $(form).validate().showErrors(Object.assign({}, errors))
                             }
                         });
 
                     }
                 })
 
-                $('.role-picker').on('change', function () {
+                $('tr .action a.edit').click( function(e) {
+                    e.preventDefault();
+                    $.get($(this).attr('href'), {__modal: true}, function(data) {
+                        console.log(data)
+                        $('.edit-modal-container').html(data.html)
+                        $('.edit-modal-container .modal').modal('show');
+
+                        $("input.tel-input").intlTelInput({
+                            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/8.4.6/js/utils.js"
+                        });
+                        $('body').on("countrychange", "input.tel-input", function(e, countryData) {
+                            $('[name=mobile_country]').val(countryData.iso2.toUpperCase())
+                        });
+                        // var validator = $('.edit-modal-container .modal form').validate()
+                    })
+                })
+
+                $('tr .action a.trash').click( function(e) {
+                    e.preventDefault();
+                    Notiflix.Confirm.show(
+                        "Critical Action Confirmation",
+                        "You're about deleting this user. Please understand that there is no trash bag. This user will be lost",
+                        "Confirm", "Cancel",
+                        function okCb() {
+                            $.ajax({
+                                url: $(this).attr('href'),
+                                method: 'DELETE',
+                                data: {_token: '{{ csrf_token() }}'}
+                            })
+                            .success( function(data) {
+                                Notiflix.Report.success('Action Completed', data.success, function cb() {
+                                    location.reload()
+                                })
+                            })
+                            .fail(error => {
+                                console.log(error);
+                            })
+                        }
+                    );
+                })
+
+                $('body').on('change', '.role-picker', function () {
                     $(this).parents('.modal-body').next().find('tbody tr').removeClass('text-muted').find('input').prop('disabled', false);
                     var tr = $(this).parents('.modal-body').next().find('tbody tr:not([data-role-name=' + $(this).find('option:selected').data('role-name') + '])');
                     tr.addClass('text-muted');
